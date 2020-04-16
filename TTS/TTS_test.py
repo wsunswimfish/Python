@@ -1,11 +1,9 @@
 import pyttsx3
 
-
 # voices
 # 25  name:Mei-Jia     languages:['zh_TW']  age:35  gender:VoiceGenderFemale
 # 36  name:Sin-ji      languages:['zh_HK']  age:35  gender:VoiceGenderFemale
 # 39  name:Ting-Ting   languages:['zh_CN']  age:35  gender:VoiceGenderFemale
-
 
 def say_init(voice=25, rate=200, volume=100):
     # 初始化引擎
@@ -42,3 +40,4 @@ def say(engine, text="info.txt"):
 if __name__ == "__main__":
     engine = say_init(rate=150)
     say(engine, "info.txt")
+
