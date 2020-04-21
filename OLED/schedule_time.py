@@ -24,8 +24,6 @@ def main():
 
         schedule.every().day.at("08:30").do(job, "一天的工作时间开始了！")
         schedule.every().day.at("10:00").do(job, "站起来活动活动，休息一下！")
-
-
         schedule.every().day.at("12:00").do(job, "午餐时间到！")
         schedule.every().day.at("12:30").do(job, "中午休息一会吧！")
         schedule.every().day.at("13:30").do(job, "下午工作时间开始了！")
