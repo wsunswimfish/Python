@@ -1,3 +1,4 @@
+#RaspBerry 3 摄像头拍照测试
 import os,time,picamera
 
 from picamera import PiCamera
