@@ -1,4 +1,4 @@
-#
+#RaspBerry LED PWM 呼吸灯 示例
 
 import time
 
@@ -6,6 +6,7 @@ import RPi.GPIO as GPIO
 
 
 def gpio_setup(channels, mode=GPIO.BOARD, channels_mode=GPIO.OUT):
+    #定义GPIO工作模式，针脚定义，针脚工作模式
     if GPIO.getmode() is None:
         GPIO.setmode(mode)
     for pin in channels:
@@ -13,6 +14,7 @@ def gpio_setup(channels, mode=GPIO.BOARD, channels_mode=GPIO.OUT):
 
 
 def led_breath(channels, frequency=2000):
+    #呼吸灯定义
     for pin in channels:
         pwm["pwm" + str(pin)] = GPIO.PWM(pin, frequency)
         pwm["pwm" + str(pin)].start(1)
@@ -39,22 +41,3 @@ if __name__ == "__main__":
         GPIO.cleanup()
 
 pwm = locals()
-
-# for pin  in pins:
-#    pwm["pwm"+str(pin)]=GPIO.PWM(pin,1000)
-#    pwm["pwm"+str(pin)].start(1)
-#
-# try:
-#    while 1:
-#        for i in range(1,100,5):
-#            for pin in pins:
-#                pwm["pwm"+str(pin)].ChangeDutyCycle(i)
-#            time.sleep(0.05)
-#        for i in range(100,0,-5):
-#            for pin in pins:
-#                pwm["pwm"+str(pin)].ChangeDutyCycle(i)
-#            time.sleep(0.05)
-# except KeyboardInterrupt:
-#    for pin in pins:
-#        pwm["pwm"+str(pin)].stop()
-#    GPIO.cleanup()
