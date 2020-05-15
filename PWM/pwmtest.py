@@ -1,4 +1,9 @@
 #RaspBerry LED PWM 呼吸灯 示例
+#呼吸序列的产生均为一元二次方程产生
+#吸气 y= 占空比 - abs(x**n)
+#呼气 y= abs(x**n)
+#n越大吸气和呼气的开始越快
+#x取值从(-占空比**(1/n),0)
 
 import time
 import numpy as np
@@ -26,16 +31,15 @@ def led_breath(channels, dutycycle_list):
             #                time.sleep(0.1)
             #time.sleep(0.16)
 
-def breath_list(cycle=3,frequency=50,dutycycle=100,ratio=1/2):
+def breath_list(cycle=3,frequency=50,dutycycle=100,ratio=1/2,n=3):
     #根据呼吸函数产生数据序列
-    # cycle(周期)  frequency(频率)   dutycycle(占空比) ratio(呼、吸时长比例)
-    b_list=[]
+    # cycle(周期)  frequency(频率)   dutycycle(占空比) ratio(呼、吸时长比例) n(n阶函数)
     #吸序列生成
-    xx_list=np.linspace(-10,0,cycle/(1+1/ratio)*frequency)
-    xy_list=(-xx_list**2)+dutycycle
+    xx_list=np.linspace(-dutycycle**(1/n),0,cycle/(1+1/ratio)*frequency)
+    xy_list=dutycycle-abs(xx_list**n)
     #呼序列生成
-    hx_list=np.linspace(0,10,cycle/(1+ratio)*frequency)
-    hy_list=(hx_list-dutycycle*0.5)**2
+    hx_list=np.linspace(-dutycycle**(1/n),0,cycle/(1+ratio)*frequency)
+    hy_list=abs(hx_list**n)
     #合成呼吸序列
     dutycycle_list=list(xy_list)+list(hy_list)
     return(dutycycle_list)
