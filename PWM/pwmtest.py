@@ -18,7 +18,7 @@ def gpio_setup(channels, mode=GPIO.BOARD, channels_mode=GPIO.OUT):
         GPIO.setup(pin, channels_mode)
 
 
-def led_breath(channels, dutycycle_list):
+def led_breath(channels, dutycycle_list,frequency=50):
     #呼吸灯定义
     for pin in channels:
         pwm["pwm" + str(pin)] = GPIO.PWM(pin, frequency)
@@ -29,23 +29,24 @@ def led_breath(channels, dutycycle_list):
             for pin in pins:
                 pwm["pwm" + str(pin)].ChangeDutyCycle(i)
             #                time.sleep(0.1)
-            #time.sleep(0.16)
+            time.sleep(1/frequency)
 
 def breath_list(cycle=3,frequency=50,dutycycle=100,ratio=1/2,n=3):
     #根据呼吸函数产生数据序列
     # cycle(周期)  frequency(频率)   dutycycle(占空比) ratio(呼、吸时长比例) n(n阶函数)
     #吸序列生成
-    xx_list=np.linspace(-dutycycle**(1/n),0,cycle/(1+1/ratio)*frequency)
-    xy_list=dutycycle-abs(xx_list**n)
+    xx_list=np.linspace(-dutycycle**(1/n),0,int(cycle/(1+1/ratio)*frequency))
+    xy_list=np.around(dutycycle-abs(xx_list**n),decimals=1)
     #呼序列生成
-    hx_list=np.linspace(-dutycycle**(1/n),0,cycle/(1+ratio)*frequency)
-    hy_list=abs(hx_list**n)
+    hx_list=np.linspace(-dutycycle**(1/n),0,int(cycle/(1+ratio)*frequency))
+    hy_list=np.around(abs(hx_list**n),decimals=1)
     #合成呼吸序列
     dutycycle_list=list(xy_list)+list(hy_list)
+    # print(dutycycle_list)
     return(dutycycle_list)
 
 if __name__ == "__main__":
-    pins = [33, 35, 37]
+    pins = [40]
     gpio_setup(pins, GPIO.BOARD, GPIO.OUT)
 
     try:
@@ -56,4 +57,4 @@ if __name__ == "__main__":
             pwm["pwm" + str(pin)].stop()
         GPIO.cleanup()
 
-pwm = locals()
+# pwm = locals()
