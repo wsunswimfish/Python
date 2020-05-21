@@ -71,8 +71,8 @@ def get_weather(city="101120601"):
 
         return (weather_info)
     except BaseException:
-        printc("天气参数获取失败!","red","black","flash")
-        return ("天气参数获取失败!")
+        printc("天气参数获取失败!","red","black","blink")
+        return ("天气参数获取失败!  "+time.strftime("%Y-%m-%d %H:%M %A", time.localtime()))
 
 
 def get_oil_price():
@@ -84,8 +84,8 @@ def get_oil_price():
             oil_price["update"], *oil_price["data"][15])
         return (oil_price_info)
     except BaseException:
-        printc("油价参数获取失败!","red","black","flash")
-        return ("油价参数获取失败!")
+        printc("油价参数获取失败!","red","black","blink")
+        return ("油价参数获取失败!  "+time.strftime("%Y-%m-%d %H:%M %A", time.localtime()))
 
 
 def get_datetime():
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     disp.display()  # 清屏
 
     try:
-        printc("\rOLED显示中....CTRL+C退出！","white","teal","highlight")
+        printc("\rOLED显示中....CTRL+C退出！","white","cyan")
         im = get_image()
         dr = get_draw(im)
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
         p2.join()
 
     except KeyboardInterrupt:
-        printc("显示被终止！","white","teal","highlight")
+        printc("显示被终止！","white","cyan")
 
     finally:
         disp.clear()
