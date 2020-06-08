@@ -1,5 +1,4 @@
-# 根据给定的IP地址段，自动搜索运行的网络设备，获取网络设备IP信息、设备基本信息、设备运行数据，写入MariaDB数据库
-# 除运行信息获取外，其它模块一般在初始化时使用
+# 根据给定的IP地址段，自动搜索运行的网络设备，并将IP信息、设备基本信息、设备运行数据写入MariaDB数据库
 
 import os
 import re
@@ -74,9 +73,9 @@ def get_ip_snmp_info(ip_list_status, snmp_oid_list, community):  # 获取存活i
                 print("{}snmp信息获取不完整！".format(ip))
                 e = 0
                 break
-            print(ip_snmp_dic[snmp_oid])
+            # print(ip_snmp_dic[snmp_oid])
         if e: ip_snmp += list(zip(ip_list, *ip_snmp_dic.values()))
-        print(ip_snmp)
+        # print(ip_snmp)
 
     return (ip_snmp)
 
@@ -107,42 +106,77 @@ if __name__ == "__main__":
     snmp_oid_dic = {"base": ["sysDescr", "sysUpTime", "sysContact", "sysName", "sysLocation", "ifNumber"],
                     "detial": ["ifIndex", "ifDescr", "ifType", "ifMtu", "ifSpeed", "ifAdminStatus", "ifOperStatus",
                                "ifLastChange"],
-                    "running": ["ifIndex", "ifInOctets", "ifInDiscards", "ifInErrors", "ifInUnknownProtos",
+                    "running": ["ifInOctets", "ifInDiscards", "ifInErrors", "ifInUnknownProtos",
                                 "ifOutOctets", "ifOutDiscards", "ifOutErrors", "ifOutQLen"]}
 
     conn_db_info = {"host": "127.0.0.1", "user": "root", "passwd": "mypasswordisroot", "db": "snmp", "port": 3793}
 
-    # 2.获取存活ip地址
-
-    # 2.1重新扫描存活ip
-
-    ip_list_status = scan_ip(ip_start, ip_end)
-
-    # 2.2从本地文本读取ip地址
-
-    # with open("ip.text", "r", encoding="utf8") as f:
-    #     ip_list = f.readline()
-    #     ip_list_status = ip_list.split(",")
-
-    # 3.获取存活ip基本信息
-
-    ip_snmp = get_ip_snmp_info(ip_list_status, snmp_oid_dic["base"], community)
-
-    # 3.1获取的基本信息写库
-
-    field_name_list = ["ip"] + snmp_oid_dic["base"]
-    wr_db(conn_db_info, "dev_ip", field_name_list, ip_snmp)
-
-    # 4.获取存活ip详细信息
-
-    ip_snmp = get_ip_snmp_info(ip_list_status, snmp_oid_dic["detial"], community)
-
-    # 4.1获取的详细信息写库
-    field_name_list = ["ip"] + snmp_oid_dic["detial"]
-    wr_db(conn_db_info, "dev_detial", field_name_list, ip_snmp)
-
-    # 5.执行结束
-
-    print("\n{:=<126}\n程序执行完毕，耗时{}秒".format("", time.perf_counter() - t_start))
-
+    # # 2.获取存活ip地址
     #
+    # # 2.1重新扫描存活ip
+    #
+    # ip_list_status = scan_ip(ip_start, ip_end)
+    #
+    # # 2.2从本地文本读取ip地址
+    #
+    # # with open("ip.text", "r", encoding="utf8") as f:
+    # #     ip_list = f.readline()
+    # #     ip_list_status = ip_list.split(",")
+    #
+    # # 3.获取存活ip基本信息
+    #
+    # ip_snmp = get_ip_snmp_info(ip_list_status, snmp_oid_dic["base"], community)
+    #
+    # # 3.1获取的基本信息写库
+    #
+    # field_name_list = ["ip"] + snmp_oid_dic["base"]
+    # wr_db(conn_db_info, "dev_ip", field_name_list, ip_snmp)
+    #
+    # # 4.获取存活ip详细信息
+    #
+    # ip_snmp = get_ip_snmp_info(ip_list_status, snmp_oid_dic["detial"], community)
+    #
+    # # 4.1获取的详细信息写库
+    # field_name_list = ["ip"] + snmp_oid_dic["detial"]
+    # wr_db(conn_db_info, "dev_detial", field_name_list, ip_snmp)
+
+    # 5.执行运行数据检索
+
+    conn = pymysql.connect(**conn_db_info)
+    cur = conn.cursor()
+
+    sql = "select ip,ifindex from view_dev_info where mon "
+    # print(sql)
+    cur.execute(sql)
+    ip_if_info = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    while 1:
+
+        if_running_list = []
+
+        for ip in ip_if_info:
+            print("\n正在获取{}的运行信息...:\n{:=<126}".format(ip, ""))
+            if_running_info = ip
+            e = 1
+            for ii in snmp_oid_dic["running"]:
+                try:
+                    if_running_info += (snmpwalk(i[0], ".".join([ii, ip[1]]), "xxww")[0][1],)
+                except:
+                    print("{}snmp信息获取不完整！".format(ip))
+                    e = 0
+                    break
+
+                if e: if_running_list.append(if_running_info)
+
+        # print(if_running_list)
+
+        field_name_list = ["ip", "ifIndex"] + snmp_oid_dic["running"]
+        wr_db(conn_db_info, "dev_run", field_name_list, if_running_list)
+
+        time.sleep(300)
+
+# 6.执行结束
+
+print("\n{:=<126}\n程序执行完毕，耗时{}秒".format("", time.perf_counter() - t_start))
