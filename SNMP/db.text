@@ -1,0 +1,28 @@
+CREATE TABLE `dev_ip` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` char(15) DEFAULT NULL,
+  `sysDescr` varchar(255) DEFAULT NULL,
+  `sysUpTime` char(50) DEFAULT NULL,
+  `sysContact` char(50) DEFAULT NULL,
+  `sysName` char(50) DEFAULT NULL,
+  `sysLocation` char(50) DEFAULT NULL,
+  `ifNumber` char(5) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8 COMMENT='网络设备基本信息';
+
+
+CREATE TABLE `dev_detial` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` char(15) DEFAULT NULL,
+  `ifIndex` char(50) DEFAULT NULL,
+  `ifDescr` char(50) DEFAULT NULL,
+  `ifType` char(50) DEFAULT NULL,
+  `ifMtu` char(50) DEFAULT NULL,
+  `ifSpeed` char(50) DEFAULT NULL,
+  `ifAdminStatus` char(50) DEFAULT NULL,
+  `ifOperStatus` char(50) DEFAULT NULL,
+  `ifLastChange` char(50) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='网络设备详细信息';
+
+
