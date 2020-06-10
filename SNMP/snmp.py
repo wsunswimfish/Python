@@ -88,10 +88,10 @@ def wr_db(conn_db_info, table_name, field_name_list, values_list):
     values_name = ",".join(["%s" for i in field_name_list])
 
     sql = "insert into  {}  ({})  values ({})  ".format(table_name, field_name, values_name)
-    print(sql)
+    print("SQL:{}".format(sql))
     cur.executemany(sql, values_list)
     conn.commit()
-    print("数据写库完成。")
+    print("数据写库完成。{}\n{:=<126}".format(time.strftime("%Y-%m-%d %H:%M", time.localtime()), ""))
     cur.close()
     conn.close()
 
@@ -156,21 +156,13 @@ if __name__ == "__main__":
 
         if_running_list = []
 
-        for ip in ip_if_info:
-            print("\n正在获取{}的运行信息...:\n{:=<126}".format(ip, ""))
-            if_running_info = ip
-            e = 1
+        for i in ip_if_info:
+            if_running_info = i
+
             for ii in snmp_oid_dic["running"]:
-                try:
-                    if_running_info += (snmpwalk(i[0], ".".join([ii, ip[1]]), "xxww")[0][1],)
-                except:
-                    print("{}snmp信息获取不完整！".format(ip))
-                    e = 0
-                    break
-
-                if e: if_running_list.append(if_running_info)
-
-        # print(if_running_list)
+                if_running_info += (snmpwalk(i[0], ".".join([ii, i[1]]), "xxww")[0][1],)
+            if_running_list.append(if_running_info)
+        print("Values:{}".format(if_running_list))
 
         field_name_list = ["ip", "ifIndex"] + snmp_oid_dic["running"]
         wr_db(conn_db_info, "dev_run", field_name_list, if_running_list)
