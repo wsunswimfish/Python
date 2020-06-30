@@ -1,0 +1,15 @@
+1、终端窗口执行一下命令：
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+2、如果出现443错误，先爬墙，然后执行：
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:789
+其中7890和789替换成自己的端口
+
+3、如还不行，浏览器打开
+https://raw.githubusercontent.com/Homebrew/install/master/install
+将内容存为brew_install.br
+
+4、然后执行
+/usr/bin/ruby brew_install.br
+
+
