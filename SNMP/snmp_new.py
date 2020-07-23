@@ -3,9 +3,10 @@
 import os
 import re
 import time
+
 import pymysql
 from snmp_cmds import snmpwalk
-from datetime import datetime
+
 
 def get_ip_list(ip_start, ip_end):  # 通过起止ip计算可用地址段列表
     pattern = re.compile(
@@ -117,7 +118,7 @@ def refresh_ip_snmp_info_base():
     field_name_list = ["ip"] + snmp_oid_dic["base"]
     wr_db(conn_db_info, "dev_ip", field_name_list, ip_snmp)
 
-    sql = "update dev_ip set is_mon=1 where id in (select a.id from dev_ip as a ,(select ip,max(scan_time) as scan_time from dev_ip_history  where is_mon=1  group by ip) as b where a.ip=b.ip)"
+    sql = "update dev_ip set is_mon=1 where ip in  (select ip from dev_ip_history as a where a.scan_time=( select max(b.scan_time) from dev_ip_history as b where b.ip=a.ip  ) and a.is_mon =1) "
     cur.execute(sql)
     conn.commit()
 
@@ -147,7 +148,7 @@ def refresh_ip_snmp_info_detial():
     field_name_list = ["ip"] + snmp_oid_dic["detial"]
     wr_db(conn_db_info, "dev_detial", field_name_list, ip_snmp)
 
-    sql = "update dev_detial set is_mon=1 where id in (select a.id from dev_detial as a ,(select ip,ifindex,max(scan_time) as scan_time from dev_detial_history  where is_mon=1  group by ip,ifindex) as b where a.ip=b.ip and a.ifindex=b.ifindex)"
+    sql = "update dev_detial set is_mon=1 where concat(ip,'@',ifindex) in  (select concat(a.ip ,'@',a.ifindex) from dev_detial_history as a where a.scan_time=( select max(b.scan_time) from dev_detial_history as b where b.ip=a.ip and b.ifindex=a.ifindex  )  and a.is_mon=1) "
     cur.execute(sql)
     conn.commit()
 
@@ -201,7 +202,7 @@ if __name__ == "__main__":
     # wr_db(conn_db_info, "dev_detial", field_name_list, ip_snmp)
 
     # 5.执行运行数据检索
-    mday = time.localtime().tm_mday
+    mday=time.localtime().tm_mday
     while 1:
 
         conn = pymysql.connect(**conn_db_info)
@@ -211,9 +212,9 @@ if __name__ == "__main__":
         # print(sql)
         cur.execute(sql)
         ip_if_info = cur.fetchall()
-        # cur.close()
-        # conn.close()
-        # print(ip_if_info)
+        cur.close()
+        conn.close()
+
         if_running_list = []
 
         for i in ip_if_info:
@@ -226,48 +227,25 @@ if __name__ == "__main__":
                     print("{}snmp信息获取不完整！{}".format(i, time.strftime("%Y-%m-%d %H:%M", time.localtime())))
                     e = 0
                     break
-
-            if e:
-                sql = "select * from dev_run where id = (select max(id) from dev_run where ip ='{}' and ifindex='{}')".format(i[0], i[1])
-                # print(sql)
-                cur.execute(sql)
-                if_running_info_last = cur.fetchall()[0]
-                # print(if_running_info_last)
-
-                if int(if_running_info[2])>int(if_running_info_last[3]) :
-                    ifin=int(if_running_info[2])-int(if_running_info_last[3])
-                else:
-                    ifin = 2**32 - int(if_running_info_last[3]) + int(if_running_info[2])
-
-                if int(if_running_info[6])>int(if_running_info_last[7]) :
-                    ifout=int(if_running_info[6])-int(if_running_info_last[7])
-                else:
-                    ifout =2**32-int(if_running_info_last[7]) + int(if_running_info[6])
-                # print(if_running_info+(str(ifin),str(ifout)))
-                if_running_list.append(if_running_info+(ifin,ifout))
-
+            if e: if_running_list.append(if_running_info)
         print("Values:{}".format(if_running_list))
 
-        field_name_list = ["ip", "ifIndex"] + snmp_oid_dic["running"] +["ifIn","ifOut"]
+        field_name_list = ["ip", "ifIndex"] + snmp_oid_dic["running"]
 
         wr_db(conn_db_info, "dev_run", field_name_list, if_running_list)
 
-        cur.close()
-        conn.close()
-
-        if mday == time.localtime().tm_mday:
+        if mday==time.localtime().tm_mday:
             time.sleep(300)
         else:
-            mday = time.localtime().tm_mday
-            st = time.perf_counter()
+            mday == time.localtime().tm_mday
+            st=time.perf_counter()
             try:
                 refresh_ip_snmp_info_detial()
                 refresh_ip_snmp_info_base()
-                time.sleep(300 - time.perf_counter() + st)
+                time.sleep(300-time.perf_counter()+st)
             except:
                 pass
-
-
+    #
 
     # 8.执行结束
 

@@ -1,3 +1,4 @@
+
 CREATE TABLE `dev_ip` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ip` char(15) DEFAULT NULL,
@@ -25,4 +26,26 @@ CREATE TABLE `dev_detial` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='网络设备详细信息';
 
+CREATE TABLE `dev_run` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` char(15) DEFAULT NULL,
+  `ifIndex` char(50) DEFAULT NULL,
+  `ifInOctets` char(50) DEFAULT NULL,
+  `ifInDiscards` char(50) DEFAULT NULL,
+  `ifInErrors` char(50) DEFAULT NULL,
+  `ifInUnknownProtos` char(50) DEFAULT NULL,
+  `ifOutOctets` char(50) DEFAULT NULL,
+  `ifOutDiscards` char(50) DEFAULT NULL,
+  `ifOutErrors` char(50) DEFAULT NULL,
+  `ifOutQLen` char(50) DEFAULT NULL,
+  `scan_time` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ifIn` decimal(12,0) DEFAULT NULL,
+  `ifOut` decimal(12,0) DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `ip` (`ip`),
+  KEY `ip_index` (`ip`,`ifIndex`)
+) ENGINE=InnoDB AUTO_INCREMENT=62707 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='网络设备基本信息';
 
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_dev_info` AS select `a`.`ip` AS `ip`,`a`.`sysName` AS `sysName`,`a`.`sysUpTime` AS `sysUpTime`,`a`.`ifNumber` AS `ifNumber`,`b`.`ifIndex` AS `ifIndex`,`b`.`ifDescr` AS `ifDescr`,`b`.`ifMtu` AS `ifMtu`,cast(`b`.`ifSpeed` / 1000000 as signed) AS `ifSpeed`,`b`.`ifLastChange` AS `ifLastChange`,`a`.`is_mon` AS `sw_mon`,`b`.`is_mon` AS `if_mon`,`a`.`is_mon` <> 0 and `b`.`is_mon` <> 0 AS `mon` from (`dev_ip` `a` join `dev_detial` `b`) where `a`.`ip` = `b`.`ip` and `b`.`ifOperStatus` = 'up';
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_dev_running` AS select `a`.`Id` AS `Id`,`a`.`ip` AS `ip`,`a`.`ifIndex` AS `ifIndex`,`a`.`ifInOctets` AS `ifInOctets`,`a`.`ifInDiscards` AS `ifInDiscards`,`a`.`ifInErrors` AS `ifInErrors`,`a`.`ifInUnknownProtos` AS `ifInUnknownProtos`,`a`.`ifOutOctets` AS `ifOutOctets`,`a`.`ifOutDiscards` AS `ifOutDiscards`,`a`.`ifOutErrors` AS `ifOutErrors`,`a`.`ifOutQLen` AS `ifOutQLen`,`a`.`scan_time` AS `scan_time`,`a`.`ifIn` AS `ifIn`,`a`.`ifOut` AS `ifOut`,`b`.`sysName` AS `sysname`,`b`.`ifDescr` AS `ifdescr`,`b`.`ifSpeed` AS `ifspeed` from (`dev_run` `a` left join `view_dev_info` `b` on(`a`.`ip` = `b`.`ip` and `a`.`ifIndex` = `b`.`ifIndex`));
