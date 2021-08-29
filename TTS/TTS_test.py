@@ -1,6 +1,7 @@
+# TTS语音阅读
 import pyttsx3 #v.2.87版本
 
-# voices
+# voices 中文人声选择
 # 25  name:Mei-Jia     languages:['zh_TW']  age:35  gender:VoiceGenderFemale
 # 36  name:Sin-ji      languages:['zh_HK']  age:35  gender:VoiceGenderFemale
 # 39  name:Ting-Ting   languages:['zh_CN']  age:35  gender:VoiceGenderFemale
@@ -14,7 +15,6 @@ def say_init(voice=25, rate=200, volume=100):
     engine.setProperty("voice", engine.getProperty("voices")[voice].id)
     print("阅读语速设置：{}  阅读音量设置：{}".format(rate, volume))
     return (engine)
-
 
 def say(engine, text="info.txt"):
     # 阅读文本
@@ -41,6 +41,7 @@ def say(engine, text="info.txt"):
 
 
 if __name__ == "__main__":
-    engine = say_init(voice=25,rate=150)
+    #初始化语音引擎，阅读指定文本内容
+    engine = say_init(voice=36,rate=150)
     say(engine, "info1.txt")
 
